@@ -1,4 +1,4 @@
-/* hand written and concocted - by Hans - with love */
+/* concocted and hand written - by Hans - with love */
 /* BSD-3 License */
 
 use core::{fmt, mem};

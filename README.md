@@ -1,2 +1,8 @@
 # Eta Combinator Core (no_std)
-> documentation WIP
+
+## Basic Usage
+```rs
+
+```
+
+> Documentation under heavy WIP.

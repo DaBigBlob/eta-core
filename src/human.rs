@@ -1,6 +1,6 @@
 
 
-use alloc::{format, string::{String, ToString}};
+use alloc::{borrow::ToOwned, format, string::String};
 use core::str;
 use hashbrown::HashMap;
 
@@ -13,12 +13,14 @@ pub struct Dict {
 }
 impl Dict {
     pub fn new() -> Self { Self {map: HashMap::new(), rev: HashMap::new(), i: 0} }
-    pub fn get(&mut self, name: String) -> Option<ID> {
-        match self.map.get(&name) {
+    pub fn get(&mut self, name: &str) -> Option<ID> {
+        match self.map.get(name) {
             Some(id) => Some(*id),
             None => {
-                self.map.insert(name.clone(), self.i);
-                self.rev.insert(self.i, name);
+                let owd = name.to_owned();
+                self.map.insert(owd.clone(), self.i);
+                self.rev.insert(self.i, owd);
+
                 let ret = self.i;
                 match self.i.checked_add(1) {
                     Some(ni) => {
@@ -97,7 +99,7 @@ impl<'a> Prsr<'a> {
         )
     }
 
-    fn parse_atom(&mut self) -> Result<String, PrsErr> {
+    fn parse_atom(&mut self) -> Result<&str, PrsErr> {
         self.skip_ws();
         let start = self.i;
 
@@ -110,7 +112,7 @@ impl<'a> Prsr<'a> {
         }
 
         match str::from_utf8(&self.s[start..self.i]) {
-            Ok(sym) => Ok(sym.to_string()),
+            Ok(sym) => Ok(sym),
             Err(_) => Err(PrsErr {msg: "invalid utf-8 in symbol", byte: start }),
         }
     }
