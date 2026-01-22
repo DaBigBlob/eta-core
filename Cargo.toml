@@ -3,9 +3,10 @@ name = "eta-core"
 version = "0.1.0"
 edition = "2021"
 license = "BSD-2-Clause"
-license-file = "LICENSE"
 authors = ["Hans S. <hans@0x8.io>"]
+description = "Eta Combinator Core (no_std)"
 repository = "https://github.com/DaBigBlob/eta-core"
+readme = "README.md"
 
 [dependencies]
 hashbrown = { version = "0.16.1", default-features = false, features = ["alloc", "default-hasher", "inline-more"] }
