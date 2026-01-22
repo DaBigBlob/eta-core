@@ -7,7 +7,7 @@ extern crate alloc;
 extern crate core;
 
 use core::{fmt, mem};
-use alloc::{boxed::Box, format, string::String};
+use alloc::{boxed::Box, string::String};
 use hashbrown::HashMap;
 
 #[deny(clippy::unwrap_used)]
@@ -235,25 +235,5 @@ impl Dict {
     /* expensive (kinda) */
     pub fn get_name(&self, id: ID) -> Option<String> {
         self.rev.get(&id).cloned()
-    }
-}
-
-pub fn pretty_string(root: &Kind, dict: &Dict) -> String {
-    match root {
-        Kind::Alp { id } => match dict.get_name(*id) {
-            Some(name) => name,
-            None => format!("#{root:?}"),
-        },
-        Kind::Zta { sid, .. } => match *sid {
-            None => format!("#{root:?}"),
-            Some(id) => match dict.get_name(id) {
-                Some(name) => name,
-                None => format!("#{root:?}"),
-            },
-        }
-        Kind::Pir { l, r } => format!(
-            "({} {})",
-            pretty_string(l, dict), pretty_string(r, dict)
-        )
     }
 }
