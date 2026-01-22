@@ -205,7 +205,7 @@ pub fn lore_end() -> Kind {
         new_eta_kind(),
         Kind::from((
             Kind::from((new_omi_kind(), new_omi_kind())),
-            new_omi_kind()
+            new_eta_kind()
         ))
     ))
 }
