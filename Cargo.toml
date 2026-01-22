@@ -1,0 +1,9 @@
+[package]
+name = "eta-core"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Hans S. <hans@0x8.io>"]
+
+[dependencies]
+hashbrown = { version = "0.16.1", default-features = false, features = ["alloc", "default-hasher", "inline-more"] }
