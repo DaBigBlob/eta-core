@@ -13,15 +13,20 @@ pub struct Dict {
 }
 impl Dict {
     pub fn new() -> Self { Self {map: HashMap::new(), rev: HashMap::new(), i: 0} }
-    pub fn get(&mut self, name: String) -> ID {
+    pub fn get(&mut self, name: String) -> Option<ID> {
         match self.map.get(&name) {
-            Some(id) => *id,
+            Some(id) => Some(*id),
             None => {
                 self.map.insert(name.clone(), self.i);
                 self.rev.insert(self.i, name);
                 let ret = self.i;
-                self.i += 1;
-                ret
+                match self.i.checked_add(1) {
+                    Some(ni) => {
+                        self.i = ni;
+                        Some(ret)
+                    },
+                    None => None,
+                }
             },
         }
     }
@@ -78,7 +83,7 @@ impl<'a> Prsr<'a> {
         self.skip_ws();
         match self.bump() {
             Some(got) if got == want => Ok(()),
-            _ => Err(PrsErr { msg: "unexpected character", byte: self.i }),
+            _ => Err(PrsErr {msg: "unexpected character", byte: self.i}),
         }
     }
 
@@ -101,12 +106,12 @@ impl<'a> Prsr<'a> {
         }
 
         if self.i == start {
-            return Err(PrsErr { msg: "expected atom", byte: self.i });
+            return Err(PrsErr {msg: "expected atom", byte: self.i});
         }
 
         match str::from_utf8(&self.s[start..self.i]) {
             Ok(sym) => Ok(sym.to_string()),
-            Err(_) => Err(PrsErr { msg: "invalid utf-8 in symbol", byte: start }),
+            Err(_) => Err(PrsErr {msg: "invalid utf-8 in symbol", byte: start }),
         }
     }
 
@@ -116,9 +121,12 @@ impl<'a> Prsr<'a> {
             Some(b'(') => self.parse_blist(dict),
             Some(_) => {
                 let sym = self.parse_atom()?;
-                Ok(Kind::from(dict.get(sym)))
+                match dict.get(sym) {
+                    Some(gsy) => Ok(Kind::from(gsy)),
+                    None => Err(PrsErr {msg: "internal namespace full", byte: self.i}),
+                }
             }
-            None => Err(PrsErr { msg: "unexpected end of input", byte: self.i }),
+            None => Err(PrsErr {msg: "unexpected end of input", byte: self.i}),
         }
     }
 
@@ -135,7 +143,7 @@ impl<'a> Prsr<'a> {
                 msg: "binary list (s-pair) must contain exactly 2 binary s-expressions",
                 byte: self.i
             }),
-            None => Err(PrsErr { msg: "missing ')'", byte: self.i }),
+            None => Err(PrsErr {msg: "missing ')'", byte: self.i}),
         }
     }
 }
@@ -145,7 +153,7 @@ pub fn parse(input: &str, dict: &mut Dict) -> Result<Kind, PrsErr> {
     let k = p.parse_blist(dict)?;
     p.skip_ws();
     if !p.eof() {
-        return Err(PrsErr { msg: "trailing input", byte: p.i });
+        return Err(PrsErr {msg: "trailing input", byte: p.i});
     }
     Ok(k)
 }
