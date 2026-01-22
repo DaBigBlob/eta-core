@@ -7,7 +7,7 @@ extern crate alloc;
 extern crate core;
 
 use core::{fmt, mem};
-use alloc::{boxed::Box, string::String};
+use alloc::boxed::Box;
 use hashbrown::HashMap;
 
 #[deny(clippy::unwrap_used)]
@@ -212,28 +212,3 @@ pub fn lore_end() -> Kind {
 
 /******************************************************************/
 /* remember to always give back what you dont use */
-
-pub struct Dict {
-    map: HashMap<String, ID>,
-    rev: HashMap<ID, String>,
-    i: ID
-}
-impl Dict {
-    pub fn new() -> Self { Self {map: HashMap::new(), rev: HashMap::new(), i: 0} }
-    pub fn get(&mut self, name: String) -> ID {
-        match self.map.get(&name) {
-            Some(id) => *id,
-            None => {
-                self.map.insert(name.clone(), self.i);
-                self.rev.insert(self.i, name);
-                let ret = self.i;
-                self.i += 1;
-                ret
-            },
-        }
-    }
-    /* expensive (kinda) */
-    pub fn get_name(&self, id: ID) -> Option<String> {
-        self.rev.get(&id).cloned()
-    }
-}
