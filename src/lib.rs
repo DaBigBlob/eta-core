@@ -35,10 +35,8 @@ impl From<ID> for Kind {
 impl TryFrom<(ZtaFn, ID)> for Kind {
     type Error = ();
     fn try_from(val: (ZtaFn, ID)) -> Result<Self, Self::Error> {
-        match val.1.checked_add(2) {
-            Some(hid) => Ok(Self::Zta {sid: None, hid, fnc: val.0}),
-            None => Err(()),
-        }
+        if val.1 < 2 { return Err(()) }
+        Ok(Self::Zta {sid: None, hid: val.1, fnc: val.0})
     }
 }
 impl From<(Kind, Kind)> for Kind {
