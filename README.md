@@ -1,4 +1,5 @@
 # Eta Combinator Core (no_std)
+Rust implementation of my structural calculus.
 
 ## Basic Usage
 ```rs
