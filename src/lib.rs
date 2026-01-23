@@ -7,4 +7,4 @@ extern crate core;
 
 pub mod theory;
 pub mod human;
-pub mod runner;
+pub mod basic;
