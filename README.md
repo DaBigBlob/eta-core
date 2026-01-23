@@ -37,4 +37,30 @@ match eta(&mut exp) {
 }
 ```
 
+## Lambda Calculus
+Lambda calculus can be implemented as a sub-calculus of Eta.
+
+```lisp
+((E ((A A) E)) ;main
+;Lx
+(E (
+(P (E
+;Px
+;lambda calculus expression here
+;note: P is application, A is abstraction
+(P ((A (x ())) x))
+;/lambda
+;/Px
+))
+;Pi
+(
+((A (n b)) x)
+(E ((n b) x))
+)
+;/Pi
+))
+;/Lx
+) ;/main
+```
+
 > Documentation under heavy WIP.
