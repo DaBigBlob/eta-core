@@ -47,8 +47,8 @@ Lambda calculus can be implemented as a sub-calculus of Eta.
 (P (E
 ;Px
 ;lambda calculus expression here
-;note: P is application, A is abstraction
-(P ((A (x ())) x))
+;note: P is application, A is abstraction as we have set up here
+(P ((A (x (x x))) x))
 ;/lambda
 ;/Px
 ))
