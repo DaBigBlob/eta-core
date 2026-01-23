@@ -1,6 +1,6 @@
 [package]
 name = "eta-core"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license = "BSD-2-Clause"
 authors = ["Hans S. <hans@0x8.io>"]

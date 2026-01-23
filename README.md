@@ -11,6 +11,8 @@ print!("{out}"); /* use it however */
 
 ## Advanced Usage
 ```rs
+use crate::{human::*, theory::*}; /* import */
+
 /* create new human readable name dictionary */
 let mut dict = Dict::new();
 
