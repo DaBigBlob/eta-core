@@ -1,7 +1,8 @@
 [package]
 name = "eta-core"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
+rust-version = "1.65.0"
 license = "BSD-2-Clause"
 authors = ["Hans S. <hans@0x8.io>"]
 description = "Eta Combinator Core (no_std)"

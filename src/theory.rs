@@ -1,7 +1,7 @@
 /* concocted and hand written - by Hans - with love */
 /* BSD-3 License */
 
-use core::{fmt, mem};
+use core::{convert::TryFrom, fmt, mem};
 use alloc::boxed::Box;
 use hashbrown::HashMap;
 

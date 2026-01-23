@@ -17,8 +17,8 @@ pub fn runner(out: &mut String, input: &str) {
     };
 
     let mut exp = lore(Kind::from((inp, lore_end())));
-    // let _ = write!(out, "inp: {}\n", pretty_string(&inp, &dict));
-    // let _ = write!(out, "exp: {}\n", pretty_string(&exp, &dict));
+    // let _ = write!(out, "inp: {}\n", unparse(&inp, &dict));
+    let _ = write!(out, "exp: {}\n", unparse(&exp, &dict));
 
     match eta(&mut exp) {
         Ok(res) => { let _ = write!(out, "[^] {}\n", unparse(&res, &dict)); }
