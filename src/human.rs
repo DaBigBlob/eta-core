@@ -1,14 +1,14 @@
 
 
-use alloc::{format, string::String, sync::Arc};
+use alloc::{format, rc::Rc, string::String};
 use core::str;
 use hashbrown::HashMap;
 
 use crate::theory::*;
 
 pub struct Dict {
-    map: HashMap< Arc<String>, ID>,
-    rev: HashMap<ID, Arc<String>>,
+    map: HashMap< Rc<String>, ID>,
+    rev: HashMap<ID, Rc<String>>,
     i: ID
 }
 impl Dict {
@@ -17,7 +17,7 @@ impl Dict {
         match self.map.get(&name) {
             Some(id) => Some(*id),
             None => {
-                let owd: Arc<String> = Arc::from(name);
+                let owd: Rc<String> = Rc::from(name);
                 self.map.insert(owd.clone(), self.i);
                 self.rev.insert(self.i, owd);
 
@@ -34,7 +34,7 @@ impl Dict {
     }
     /* expensive (kinda) */
     pub fn get_name(&self, id: ID) -> Option<&str> {
-        self.rev.get(&id).map(Arc::as_ref).map(|x| x.as_str())
+        self.rev.get(&id).map(Rc::as_ref).map(|x| x.as_str())
     }
 }
 
