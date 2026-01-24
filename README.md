@@ -12,7 +12,11 @@ print!("{out}"); /* use it however */
 
 ## Advanced Usage
 ```rs
+/* this is basically the implementation of eta_core::basic::runner */
+
 use eta_core::{human::*, theory::*}; /* import */
+
+let mut out = String::new();  /* create output string for reuse */
 
 /* create new human readable name dictionary */
 let mut dict = Dict::new();
