@@ -1,23 +1,23 @@
 
 
-use alloc::{borrow::ToOwned, format, string::String};
+use alloc::{format, string::String, sync::Arc};
 use core::str;
 use hashbrown::HashMap;
 
 use crate::theory::*;
 
 pub struct Dict {
-    map: HashMap<String, ID>,
-    rev: HashMap<ID, String>,
+    map: HashMap< Arc<String>, ID>,
+    rev: HashMap<ID, Arc<String>>,
     i: ID
 }
 impl Dict {
     pub fn new() -> Self { Self {map: HashMap::new(), rev: HashMap::new(), i: 0} }
-    pub fn get(&mut self, name: &str) -> Option<ID> {
-        match self.map.get(name) {
+    pub fn get(&mut self, name: String) -> Option<ID> {
+        match self.map.get(&name) {
             Some(id) => Some(*id),
             None => {
-                let owd = name.to_owned();
+                let owd: Arc<String> = Arc::from(name);
                 self.map.insert(owd.clone(), self.i);
                 self.rev.insert(self.i, owd);
 
@@ -33,8 +33,8 @@ impl Dict {
         }
     }
     /* expensive (kinda) */
-    pub fn get_name(&self, id: ID) -> Option<String> {
-        self.rev.get(&id).cloned()
+    pub fn get_name(&self, id: ID) -> Option<&str> {
+        self.rev.get(&id).map(Arc::as_ref).map(|x| x.as_str())
     }
 }
 
@@ -47,18 +47,18 @@ pub struct PrsErr {
 
 /* parser: binary s-expressions (s-pairs) */
 struct Prsr<'a> {
-    s: &'a [u8],
+    s: &'a str,
     i: usize,
 }
 impl<'a> Prsr<'a> {
-    fn new(input: &'a str) -> Self {
-        Self { s: input.as_bytes(), i: 0 }
+    fn new(s: &'a str) -> Self {
+        Self { s, i: 0 }
     }
 
-    fn eof(&self) -> bool { self.i >= self.s.len() }
-    fn peek(&self) -> Option<u8> { self.s.get(self.i).copied() }
+    fn eof(&self) -> bool { self.i >= self.s.chars().count() }
+    fn peek(&self) -> Option<char> { self.s.chars().nth(self.i) }
 
-    fn bump(&mut self) -> Option<u8> {
+    fn bump(&mut self) -> Option<char> {
         let b = self.peek()?;
         self.i += 1;
         Some(b)
@@ -67,13 +67,13 @@ impl<'a> Prsr<'a> {
     fn skip_ws(&mut self) {
         while let Some(b) = self.peek() {
             match b {
-                b' ' | b'\t' | b'\r' | b'\n' => self.i += 1,
-                b';' => {
+                ' ' | '\t' | '\r' | '\n' => self.i += 1,
+                ';' => {
                     /* comment to end-of-line */
                     self.i += 1;
                     while let Some(c) = self.peek() {
                         self.i += 1;
-                        if c == b'\n' { break; }
+                        if c == '\n' { break; }
                     }
                 }
                 _ => break,
@@ -81,7 +81,7 @@ impl<'a> Prsr<'a> {
         }
     }
 
-    fn expect(&mut self, want: u8) -> Result<(), PrsErr> {
+    fn expect(&mut self, want: char) -> Result<(), PrsErr> {
         self.skip_ws();
         match self.bump() {
             Some(got) if got == want => Ok(()),
@@ -89,17 +89,11 @@ impl<'a> Prsr<'a> {
         }
     }
 
-    fn is_sym_char(b: u8) -> bool {
-        matches!(
-            b,
-            b'a'..=b'z' |
-            b'A'..=b'Z' |
-            b'0'..=b'9' |
-            b'_' | b'-' | b'+' | b'*' | b'/' | b'=' | b'<' | b'>' | b'!' | b'?' | b'.'
-        )
+    fn is_sym_char(b: char) -> bool {
+        !matches!(b, ' ' | '\t' | '\r' | '\n' | '(' | ')' | ';')
     }
 
-    fn parse_atom(&mut self) -> Result<&str, PrsErr> {
+    fn parse_atom(&mut self) -> Result<String, PrsErr> {
         self.skip_ws();
         let start = self.i;
 
@@ -111,16 +105,13 @@ impl<'a> Prsr<'a> {
             return Err(PrsErr {msg: "expected atom", byte: self.i});
         }
 
-        match str::from_utf8(&self.s[start..self.i]) {
-            Ok(sym) => Ok(sym),
-            Err(_) => Err(PrsErr {msg: "invalid utf-8 in symbol", byte: start }),
-        }
+        Ok(self.s.chars().skip(start).take(self.i - start).collect())
     }
 
     fn parse_expr(&mut self, dict: &mut Dict) -> Result<Kind, PrsErr> {
         self.skip_ws();
         match self.peek() {
-            Some(b'(') => self.parse_blist(dict),
+            Some('(') => self.parse_blist(dict),
             Some(_) => {
                 let sym = self.parse_atom()?;
                 match dict.get(sym) {
@@ -134,15 +125,15 @@ impl<'a> Prsr<'a> {
 
     // '(' expr expr ')', exactly two.
     fn parse_blist(&mut self, dict: &mut Dict) -> Result<Kind, PrsErr> {
-        self.expect(b'(')?;
+        self.expect('(')?;
         let l = self.parse_expr(dict)?;
         let r = self.parse_expr(dict)?;
         self.skip_ws();
 
         match self.peek() {
-            Some(b')') => { self.i += 1; Ok(Kind::from((l, r))) }
+            Some(')') => { self.i += 1; Ok(Kind::from((l, r))) }
             Some(_) => Err(PrsErr {
-                msg: "binary list (s-pair) must contain exactly 2 binary s-expressions",
+                msg: "s-pair must contain exactly 2 binary s-pairs",
                 byte: self.i
             }),
             None => Err(PrsErr {msg: "missing ')'", byte: self.i}),
@@ -163,13 +154,13 @@ pub fn parse(input: &str, dict: &mut Dict) -> Result<Kind, PrsErr> {
 pub fn unparse(root: &Kind, dict: &Dict) -> String {
     match root {
         Kind::Alp { id } => match dict.get_name(*id) {
-            Some(name) => name,
+            Some(name) => name.into(),
             None => format!("#{root:?}"),
         },
         Kind::Zta { sid, .. } => match *sid {
             None => format!("#{root:?}"),
             Some(id) => match dict.get_name(id) {
-                Some(name) => name,
+                Some(name) => name.into(),
                 None => format!("#{root:?}"),
             },
         }
