@@ -11,7 +11,7 @@ pub fn runner(out: &mut String, input: &str) {
     let inp = match parse(input, &mut dict) {
         Ok(k) => k,
         Err(e) => {
-            let _ = write!(out, "P[!]: parse error at byte {}: {}\n", e.byte, e.msg);
+            let _ = write!(out, "P[!]: parse error at byte {}: {}\n", e.pos, e.msg);
             return;
         }
     };

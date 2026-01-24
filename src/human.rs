@@ -42,7 +42,7 @@ impl Dict {
 #[derive(Clone, Debug)]
 pub struct PrsErr {
     pub msg: &'static str,
-    pub byte: usize,
+    pub pos: usize,
 }
 
 /* parser: binary s-expressions (s-pairs) */
@@ -85,7 +85,7 @@ impl<'a> Prsr<'a> {
         self.skip_ws();
         match self.bump() {
             Some(got) if got == want => Ok(()),
-            _ => Err(PrsErr {msg: "unexpected character", byte: self.i}),
+            _ => Err(PrsErr {msg: "unexpected character", pos: self.i}),
         }
     }
 
@@ -102,7 +102,7 @@ impl<'a> Prsr<'a> {
         }
 
         if self.i == start {
-            return Err(PrsErr {msg: "expected atom", byte: self.i});
+            return Err(PrsErr {msg: "expected atom", pos: self.i});
         }
 
         Ok(self.s.chars().skip(start).take(self.i - start).collect())
@@ -116,10 +116,10 @@ impl<'a> Prsr<'a> {
                 let sym = self.parse_atom()?;
                 match dict.get(sym) {
                     Some(gsy) => Ok(Kind::from(gsy)),
-                    None => Err(PrsErr {msg: "internal namespace full", byte: self.i}),
+                    None => Err(PrsErr {msg: "internal namespace full", pos: self.i}),
                 }
             }
-            None => Err(PrsErr {msg: "unexpected end of input", byte: self.i}),
+            None => Err(PrsErr {msg: "unexpected end of input", pos: self.i}),
         }
     }
 
@@ -134,9 +134,9 @@ impl<'a> Prsr<'a> {
             Some(')') => { self.i += 1; Ok(Kind::from((l, r))) }
             Some(_) => Err(PrsErr {
                 msg: "s-pair must contain exactly 2 binary s-pairs",
-                byte: self.i
+                pos: self.i
             }),
-            None => Err(PrsErr {msg: "missing ')'", byte: self.i}),
+            None => Err(PrsErr {msg: "missing ')'", pos: self.i}),
         }
     }
 }
@@ -146,7 +146,7 @@ pub fn parse(input: &str, dict: &mut Dict) -> Result<Kind, PrsErr> {
     let k = p.parse_blist(dict)?;
     p.skip_ws();
     if !p.eof() {
-        return Err(PrsErr {msg: "trailing input", byte: p.i});
+        return Err(PrsErr {msg: "trailing input", pos: p.i});
     }
     Ok(k)
 }

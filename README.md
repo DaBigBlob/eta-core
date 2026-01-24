@@ -12,11 +12,8 @@ print!("{out}"); /* use it however */
 
 ## Advanced Usage
 ```rs
-/* this is basically the implementation of eta_core::basic::runner */
-
+/* this is essentially the implementation of eta_core::basic::runner */
 use eta_core::{human::*, theory::*}; /* import */
-
-let mut out = String::new();  /* create output string for reuse */
 
 /* create new human readable name dictionary */
 let mut dict = Dict::new();
@@ -25,7 +22,7 @@ let mut dict = Dict::new();
 let inp = match parse(input, &mut dict) {
     Ok(k) => k,
     Err(e) => {
-        let _ = write!(out, "parse error at byte {}: {}\n", e.byte, e.msg);
+        /* do somthing sensible with e.pos (position) and e.msg (message) */
         return;
     }
 };
@@ -36,8 +33,8 @@ let inp = match parse(input, &mut dict) {
 let mut exp = lore(Kind::from((inp, lore_end())));
 
 match eta(&mut exp) {
-    Ok(res) => { let _ = write!(out, "[^] {}\n", unparse(&res, &dict)); } /* (eta could not be consumed) */
-    Err(res) => { let _ = write!(out, "[H] {}\n", unparse(&res, &dict)); } /* halt (eta is consumed) */
+    Ok(res) => println!("[^] {}\n", unparse(&res, &dict)), /* (eta could not be consumed) */
+    Err(res) => println!("[H] {}\n", unparse(&res, &dict))  /* halt (eta is consumed) */
 }
 ```
 
