@@ -88,10 +88,7 @@ impl<It: Iterator<Item = char>> Prsr<It> {
                 ' ' | '\t' | '\r' | '\n' => { self.it.next(); },
                 ';' => { /* comment to end-of-line */
                     while let Some(c) = self.it.next() {
-                        if c == '\n' {
-                            self.it.next(); /* eat \n */
-                            break
-                        }
+                        if c == '\n' { break }
                     }
                 }
                 _ => break,
