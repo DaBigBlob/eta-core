@@ -150,11 +150,11 @@ impl<It: Iterator<Item = char>> Prsr<It> {
         }
     }
 
-    pub fn has_trailing(&mut self) -> Result<usize, ()> {
+    pub fn has_trailing(&mut self) -> Option<usize> {
         self.skip_ws();
         match self.it.peek() {
-            Some(_) => Ok(self.it.pos),
-            None => Err(())
+            Some(_) => Some(self.it.pos),
+            None => None
         }
     }
 }
