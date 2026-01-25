@@ -1,26 +1,25 @@
 
-use crate::{human::*, theory::*};
+use crate::{human::{Dict, Parser, View}, theory::{Kind, eta, lore, lore_end}};
+use core::fmt::Write;
 
-use alloc::string::String;
-use core::{fmt::Write, str};
-
-/* the thing that does */
-pub fn runner(out: &mut String, input: &str) {
+/* does the basic default */
+pub fn execute<O: Write, I:Iterator<Item = char>>
+(out: &mut O, input: I) {
     let mut dict = Dict::new();
 
-    let inp = match parse(input, &mut dict) {
+    let inp = match Parser::new(input).parse_spair(&mut dict) {
         Ok(k) => k,
-        Err(e) => {
-            let _ = write!(out, "P[!]: parse error at byte {}: {}\n", e.pos, e.msg);
+        Err(err) => {
+            let _ = write!(out, "P[!]: {}\n", err);
             return;
         }
     };
 
     let mut exp = lore(Kind::from((inp, lore_end())));
-    let _ = write!(out, "I: {}\n", unparse(&exp, &dict));
+    let _ = write!(out, "I: {}\n", View::new(&exp, &dict));
 
     match eta(&mut exp) {
-        Ok(res) => { let _ = write!(out, "E[^]: {}\n", &unparse(&res, &dict)); }
-        Err(res) => { let _ = write!(out, "E[H]: {}\n", &unparse(&res, &dict)); }
+        Ok(res) => { let _ = write!(out, "E[^]: {}\n", View::new(&res, &dict)); }
+        Err(res) => { let _ = write!(out, "E[H]: {}\n", View::new(&res, &dict)); }
     }
 }

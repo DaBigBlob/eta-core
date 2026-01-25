@@ -1,10 +1,11 @@
 
 
 use alloc::{format, rc::Rc, string::String};
-use core::str;
+use core::{fmt::Display, iter::Peekable, str};
 use hashbrown::HashMap;
+use thiserror::Error;
 
-use crate::theory::*;
+use crate::theory::{ID, Kind};
 
 pub struct Dict {
     map: HashMap< Rc<String>, ID>,
@@ -39,41 +40,58 @@ impl Dict {
 }
 
 /* parse errors */
-#[derive(Clone, Debug)]
-pub struct PrsErr {
-    pub msg: &'static str,
-    pub pos: usize,
+#[derive(Debug, Error)]
+pub enum ParserErr {
+    #[error("expected '{what}' at {pos}")]
+    Expected { what: char, pos: usize },
+
+    #[error("expected an atom at {pos}")]
+    NeedAtom { pos: usize },
+
+    #[error("namespace full while at {pos}")]
+    NamespaceFull { pos: usize },
+
+    #[error("end of input at {pos}")]
+    EndOfInput { pos: usize },
+
+    #[error("pair has more than 2 members at {pos}")]
+    PairHasMore { pos: usize },
+}
+type PrsErr = ParserErr;
+
+struct Prsable<It: Iterator<Item = char>> {
+    inner: Peekable<It>,
+    pos: usize
+}
+impl<It: Iterator<Item = char>> Prsable<It> {
+    fn new(it: It) -> Self { Self { inner: it.peekable(), pos: 0 }}
+    fn next(&mut self) -> Option<char> {
+        let n = self.inner.next()?;
+        self.pos += 1;
+        Some(n)
+    }
+    fn peek(&mut self) -> Option<char> { self.inner.peek().copied() }
 }
 
 /* parser: binary s-expressions (s-pairs) */
-struct Prsr<'a> {
-    s: &'a str,
-    i: usize,
+pub struct Parser<It: Iterator<Item = char>> {
+    it: Prsable<It>
 }
-impl<'a> Prsr<'a> {
-    fn new(s: &'a str) -> Self {
-        Self { s, i: 0 }
-    }
 
-    fn eof(&self) -> bool { self.i >= self.s.chars().count() }
-    fn peek(&self) -> Option<char> { self.s.chars().nth(self.i) }
-
-    fn bump(&mut self) -> Option<char> {
-        let b = self.peek()?;
-        self.i += 1;
-        Some(b)
-    }
+type Prsr<It> = Parser<It>;
+impl<It: Iterator<Item = char>> Prsr<It> {
+    pub fn new(it: It) -> Self { Self { it: Prsable::new(it) }}
 
     fn skip_ws(&mut self) {
-        while let Some(b) = self.peek() {
+        while let Some(b) = self.it.peek() {
             match b {
-                ' ' | '\t' | '\r' | '\n' => self.i += 1,
-                ';' => {
-                    /* comment to end-of-line */
-                    self.i += 1;
-                    while let Some(c) = self.peek() {
-                        self.i += 1;
-                        if c == '\n' { break; }
+                ' ' | '\t' | '\r' | '\n' => { self.it.next(); },
+                ';' => { /* comment to end-of-line */
+                    while let Some(c) = self.it.next() {
+                        if c == '\n' {
+                            self.it.next(); /* eat \n */
+                            break
+                        }
                     }
                 }
                 _ => break,
@@ -83,9 +101,9 @@ impl<'a> Prsr<'a> {
 
     fn expect(&mut self, want: char) -> Result<(), PrsErr> {
         self.skip_ws();
-        match self.bump() {
+        match self.it.next() {
             Some(got) if got == want => Ok(()),
-            _ => Err(PrsErr {msg: "unexpected character", pos: self.i}),
+            _ => Err(PrsErr::Expected { what: want, pos: self.it.pos }),
         }
     }
 
@@ -93,62 +111,53 @@ impl<'a> Prsr<'a> {
         !matches!(b, ' ' | '\t' | '\r' | '\n' | '(' | ')' | ';')
     }
 
-    fn parse_atom(&mut self) -> Result<String, PrsErr> {
+    pub fn parse_atom(&mut self, dict: &mut Dict) -> Result<Kind, PrsErr> {
         self.skip_ws();
-        let start = self.i;
+        let mut st = String::new();
+        let start = self.it.pos;
 
-        while let Some(b) = self.peek() {
-            if Self::is_sym_char(b) { self.i += 1; } else { break; }
+        while let Some(b) = self.it.peek() {
+            if Self::is_sym_char(b) {
+                self.it.next(); /* consume */
+                st.push(b);
+            } else { break; }
         }
 
-        if self.i == start {
-            return Err(PrsErr {msg: "expected atom", pos: self.i});
+        if self.it.pos == start {
+            return Err(PrsErr::NeedAtom { pos: self.it.pos });
         }
 
-        Ok(self.s.chars().skip(start).take(self.i - start).collect())
+        match dict.get(st) {
+            Some(sy) => Ok(Kind::from(sy)),
+            None => Err(PrsErr::NamespaceFull { pos: self.it.pos }),
+        }
     }
 
-    fn parse_expr(&mut self, dict: &mut Dict) -> Result<Kind, PrsErr> {
+    pub fn parse_expr(&mut self, dict: &mut Dict) -> Result<Kind, PrsErr> {
         self.skip_ws();
-        match self.peek() {
-            Some('(') => self.parse_blist(dict),
-            Some(_) => {
-                let sym = self.parse_atom()?;
-                match dict.get(sym) {
-                    Some(gsy) => Ok(Kind::from(gsy)),
-                    None => Err(PrsErr {msg: "internal namespace full", pos: self.i}),
-                }
-            }
-            None => Err(PrsErr {msg: "unexpected end of input", pos: self.i}),
+        match self.it.peek() {
+            Some('(') => self.parse_spair(dict),
+            Some(_) => self.parse_atom(dict),
+            None => Err(PrsErr::EndOfInput { pos: self.it.pos }),
         }
     }
 
     // '(' expr expr ')', exactly two.
-    fn parse_blist(&mut self, dict: &mut Dict) -> Result<Kind, PrsErr> {
+    pub fn parse_spair(&mut self, dict: &mut Dict) -> Result<Kind, PrsErr> {
         self.expect('(')?;
         let l = self.parse_expr(dict)?;
         let r = self.parse_expr(dict)?;
         self.skip_ws();
 
-        match self.peek() {
-            Some(')') => { self.i += 1; Ok(Kind::from((l, r))) }
-            Some(_) => Err(PrsErr {
-                msg: "s-pair must contain exactly 2 binary s-pairs",
-                pos: self.i
-            }),
-            None => Err(PrsErr {msg: "missing ')'", pos: self.i}),
+        match self.it.peek() {
+            Some(')') => {
+                self.it.next(); /* consume */
+                Ok(Kind::from((l, r)))
+            }
+            Some(_) => Err(PrsErr::PairHasMore { pos: self.it.pos }),
+            None => Err(PrsErr::Expected { what: ')', pos: self.it.pos }),
         }
     }
-}
-
-pub fn parse(input: &str, dict: &mut Dict) -> Result<Kind, PrsErr> {
-    let mut p = Prsr::new(input);
-    let k = p.parse_blist(dict)?;
-    p.skip_ws();
-    if !p.eof() {
-        return Err(PrsErr {msg: "trailing input", pos: p.i});
-    }
-    Ok(k)
 }
 
 pub fn unparse(root: &Kind, dict: &Dict) -> String {
@@ -168,5 +177,36 @@ pub fn unparse(root: &Kind, dict: &Dict) -> String {
             "({} {})",
             unparse(l, dict), unparse(r, dict)
         )
+    }
+}
+
+pub struct View<'a> {
+    root: &'a Kind,
+    dict: &'a Dict
+}
+impl<'a> View<'a> {
+    pub fn new(root: &'a Kind, dict: &'a Dict) -> Self { Self { root, dict } }
+}
+
+impl<'a> Display for View<'a> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self.root {
+            Kind::Alp { id } => match self.dict.get_name(*id) {
+                Some(name) => write!(f, "{name}"),
+                None => write!(f, "#{:?}", self.root),
+            },
+            Kind::Zta { sid, .. } => match *sid {
+                None => write!(f, "#{:?}", self.root),
+                Some(id) => match self.dict.get_name(id) {
+                    Some(name) => write!(f, "{name}"),
+                    None => write!(f, "#{:?}", self.root),
+                },
+            }
+            Kind::Pir { l, r } => write!(
+                f, "({} {})",
+                View::new(l, self.dict),
+                View::new(r, self.dict)
+            )
+        }
     }
 }
