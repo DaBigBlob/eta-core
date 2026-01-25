@@ -51,7 +51,7 @@ pub enum ParserErr {
     #[error("namespace full while at {pos}")]
     NamespaceFull { pos: usize },
 
-    #[error("end of input at {pos}")]
+    #[error("unexpected end of input at {pos}")]
     EndOfInput { pos: usize },
 
     #[error("pair has more than 2 members at {pos}")]
@@ -96,25 +96,14 @@ impl<It: Iterator<Item = char>> Prsr<It> {
         }
     }
 
-    fn expect(&mut self, want: char) -> Result<(), PrsErr> {
-        self.skip_ws();
-        match self.it.next() {
-            Some(got) if got == want => Ok(()),
-            _ => Err(PrsErr::Expected { what: want, pos: self.it.pos }),
-        }
-    }
-
-    fn is_sym_char(b: char) -> bool {
-        !matches!(b, ' ' | '\t' | '\r' | '\n' | '(' | ')' | ';')
-    }
-
     pub fn parse_atom(&mut self, dict: &mut Dict) -> Result<Kind, PrsErr> {
         self.skip_ws();
         let mut st = String::new();
         let start = self.it.pos;
 
         while let Some(b) = self.it.peek() {
-            if Self::is_sym_char(b) {
+            /* checking for non-special chars */
+            if !matches!(b, ' ' | '\t' | '\r' | '\n' | '(' | ')' | ';') {
                 self.it.next(); /* consume */
                 st.push(b);
             } else { break; }
@@ -141,11 +130,16 @@ impl<It: Iterator<Item = char>> Prsr<It> {
 
     // '(' expr expr ')', exactly two.
     pub fn parse_spair(&mut self, dict: &mut Dict) -> Result<Kind, PrsErr> {
-        self.expect('(')?;
+        self.skip_ws();
+        match self.it.peek() {
+            Some('(') => { self.it.next(); } // consume '('
+            _ => return Err(PrsErr::Expected { what: '(', pos: self.it.pos }),
+        }
+
         let l = self.parse_expr(dict)?;
         let r = self.parse_expr(dict)?;
-        self.skip_ws();
 
+        self.skip_ws();
         match self.it.peek() {
             Some(')') => {
                 self.it.next(); /* consume */
