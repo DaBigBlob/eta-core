@@ -17,7 +17,7 @@ pub fn execute<O: Write, I:Iterator<Item = char>>
     };
 
     /* check for garbage at the end */
-    if let Some(at) = prs.has_trailing() {
+    if let Some(at) = prs.has_more() {
         let _ = write!(out, "X[!]: garbage after {at} chars\n");
         return;
     }

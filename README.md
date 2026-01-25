@@ -31,7 +31,7 @@ let inp = match prs.parse_spair(&mut dict) {
 };
 
 /* check for garbage at the end */
-if let Some(at) = prs.has_trailing() {
+if let Some(at) = prs.has_more() {
     eprintln!(out, "X[!]: garbage after {at} chars\n");
     return;
 }
