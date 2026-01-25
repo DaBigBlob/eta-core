@@ -7,13 +7,20 @@ pub fn execute<O: Write, I:Iterator<Item = char>>
 (out: &mut O, input: I) {
     let mut dict = Dict::new();
 
-    let inp = match Parser::new(input).parse_spair(&mut dict) {
+    let mut prs = Parser::new(input);
+    let inp = match prs.parse_spair(&mut dict) {
         Ok(k) => k,
         Err(err) => {
             let _ = write!(out, "P[!]: {}\n", err);
             return;
         }
     };
+
+    /* check for garbage at the end */
+    if let Ok(at) = prs.has_ended() {
+        let _ = write!(out, "X[!]: garbage after {at} chars\n");
+        return;
+    }
 
     let mut exp = lore(Kind::from((inp, lore_end())));
     let _ = write!(out, "I: {}\n", View::new(&exp, &dict));

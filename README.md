@@ -13,20 +13,28 @@ print!("{out}"); /* use it however */
 ## Advanced Usage
 ```rs
 /* this is essentially the implementation of eta_core::basic::runner */
+
 use eta_core::{human::*, theory::*}; /* import */
 
 /* create new human readable name dictionary */
 let mut dict = Dict::new();
 
 /* run the parser */
-let inp = match parse(input, &mut dict) {
+let mut prs = Parser::new(input);
+let inp = match prs.parse_spair(&mut dict) {
     Ok(k) => k,
-    Err(e) => {
+    Err(err) => {
         /* error implements Display so you can print it (or match on ParserErr) */
-        eprintln!("P[!]: {}\n", e);
+        eprintln!(out, "P[!]: {}\n", err);
         return;
     }
 };
+
+/* check for garbage at the end */
+if let Ok(at) = prs.has_ended() {
+    eprintln!(out, "X[!]: garbage after {at} chars\n");
+    return;
+}
 
 /* default/baisc lore */
 /* (you may create your own lore using eta_core::theory) */

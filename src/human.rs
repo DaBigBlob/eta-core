@@ -158,6 +158,13 @@ impl<It: Iterator<Item = char>> Prsr<It> {
             None => Err(PrsErr::Expected { what: ')', pos: self.it.pos }),
         }
     }
+    pub fn has_ended(&mut self) -> Result<usize, ()> {
+        self.skip_ws();
+        match self.it.peek() {
+            Some(_) => Ok(self.it.pos),
+            None => Err(())
+        }
+    }
 }
 
 pub fn unparse(root: &Kind, dict: &Dict) -> String {
