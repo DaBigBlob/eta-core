@@ -1,6 +1,6 @@
 
 
-use alloc::{format, rc::Rc, string::String};
+use alloc::{rc::Rc, string::String};
 use core::{fmt::Display, iter::Peekable, str};
 use hashbrown::HashMap;
 use thiserror::Error;
@@ -149,32 +149,13 @@ impl<It: Iterator<Item = char>> Prsr<It> {
             None => Err(PrsErr::Expected { what: ')', pos: self.it.pos }),
         }
     }
+
     pub fn has_ended(&mut self) -> Result<usize, ()> {
         self.skip_ws();
         match self.it.peek() {
             Some(_) => Ok(self.it.pos),
             None => Err(())
         }
-    }
-}
-
-pub fn unparse(root: &Kind, dict: &Dict) -> String {
-    match root {
-        Kind::Alp { id } => match dict.get_name(*id) {
-            Some(name) => name.into(),
-            None => format!("#{root:?}"),
-        },
-        Kind::Zta { sid, .. } => match *sid {
-            None => format!("#{root:?}"),
-            Some(id) => match dict.get_name(id) {
-                Some(name) => name.into(),
-                None => format!("#{root:?}"),
-            },
-        }
-        Kind::Pir { l, r } => format!(
-            "({} {})",
-            unparse(l, dict), unparse(r, dict)
-        )
     }
 }
 
