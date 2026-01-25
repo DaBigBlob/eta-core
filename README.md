@@ -3,10 +3,10 @@ Rust implementation of my structural calculus.
 
 ## Basic Usage
 ```rs
-use eta_core::basic::runner; /* import */
+use eta_core::basic; /* import */
 
 let mut out = String::new(); /* create output string for reuse */
-runner(&mut out, &input); /* run the runner */
+basic::execute(&mut out, input.chars().into_iter()); /* run the executor */
 print!("{out}"); /* use it however */
 ```
 
@@ -22,7 +22,8 @@ let mut dict = Dict::new();
 let inp = match parse(input, &mut dict) {
     Ok(k) => k,
     Err(e) => {
-        /* do somthing sensible with e.pos (position) and e.msg (message) */
+        /* error implements Display so you can print it (or match on ParserErr) */
+        eprintln!("P[!]: {}\n", e);
         return;
     }
 };
@@ -33,8 +34,8 @@ let inp = match parse(input, &mut dict) {
 let mut exp = lore(Kind::from((inp, lore_end())));
 
 match eta(&mut exp) {
-    Ok(res) => println!("[^] {}\n", unparse(&res, &dict)), /* (eta could not be consumed) */
-    Err(res) => println!("[H] {}\n", unparse(&res, &dict))  /* halt (eta is consumed) */
+    Ok(res) => println!("E[^]: {}\n", View::new(&res, &dict)), /* (eta could not be consumed) */
+    Err(res) => println!("E[H]: {}\n", View::new(&res, &dict))  /* halt (eta is consumed) */
 }
 ```
 
