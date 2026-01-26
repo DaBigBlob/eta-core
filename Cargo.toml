@@ -1,8 +1,8 @@
 [package]
 name = "eta-core"
-version = "0.5.1"
+version = "0.5.2"
 edition = "2021"
-rust-version = "1.65.0"
+rust-version = "1.68"
 license = "BSD-2-Clause"
 authors = ["Hans S. <hans@0x8.io>"]
 description = "Eta calculus Core (no_std)"
