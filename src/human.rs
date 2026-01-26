@@ -45,8 +45,8 @@ pub enum ParserErr {
     #[error("expected '{what}' at {pos}")]
     Expected { what: char, pos: usize },
 
-    #[error("expected an atom at {pos}")]
-    NeedAtom { pos: usize },
+    #[error("empty atom at {pos}")]
+    EmptyAtom { pos: usize },
 
     #[error("namespace full while at {pos}")]
     NamespaceFull { pos: usize },
@@ -110,7 +110,7 @@ impl<It: Iterator<Item = char>> Prsr<It> {
         }
 
         if self.it.pos == start {
-            return Err(PrsErr::NeedAtom { pos: self.it.pos });
+            return Err(PrsErr::EmptyAtom { pos: self.it.pos });
         }
 
         match dict.get(st) {
