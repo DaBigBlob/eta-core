@@ -51,6 +51,7 @@ match eta(&mut exp) {
 Lambda calculus can be implemented as a sub-calculus of Eta.
 
 ```lisp
+; THIS IS LAMBDA CALCULUS EXAMPLE
 ;a comment starts with ; and continues to end of line
 ((E ((A A) E)) ;external capture of eta and omicron
 
@@ -63,14 +64,14 @@ Lambda calculus can be implemented as a sub-calculus of Eta.
 ;   abstraction is of form (A (<binding variabel> <body>))
 ;NOTE: alpha renaming is not a real thing, make sure to name accordingly
 
-;;;;;;;omega combinator;;;;;;;;
+;example 1: omega combinator
 ;uncomment the following to make your stack overflow ☺️
-;; (E (P (
-;; (A (y (E (P (y y)))))
-;; (A (y (E (P (y y)))))
-;; )))
+; (E (P (
+; (A (y (E (P (y y)))))
+; (A (y (E (P (y y)))))
+; )))
 
-; make 4 of the virus 🦠
+;example 2: make 4 of the virus 🦠
 (E(P ((A (v ((v v) (v v)))) 🦠)))
 
 ;<---lambda expression end--->
