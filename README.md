@@ -1,11 +1,17 @@
 # Eta Core (no_std)
 Rust implementation of my structural calculus.
 
+## Install
+```bash
+cargo add eta-core
+```
+
 ## Basic Usage
 ```rs
 use eta_core::basic; /* import */
 
 let mut out = String::new(); /* create output string for reuse */
+/* assuming "input" is &str or String */
 basic::execute(&mut out, input.chars().into_iter()); /* run the executor */
 print!("{out}"); /* use it however */
 ```
@@ -20,6 +26,8 @@ use eta_core::{human::*, theory::*}; /* import */
 let mut dict = Dict::new();
 
 /* run the parser */
+/* "input" must implement Iterator<Item = char> */
+/* for &str and String, you may .chars().into_iter() */
 let mut prs = Parser::new(input);
 let inp = match prs.parse_spair(&mut dict) {
     Ok(k) => k,
