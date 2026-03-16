@@ -109,6 +109,10 @@ Lambda calculus can be implemented as a sub-calculus of Eta. (Evidence for turin
 )))
 ```
 
+## Generative-AI/LLM
+This is and will be a **generative-AI/LLM free** codebase. (Makes no sense to outsource human curiocity to computers lol)
+
 ## ⚠️ **TODO**
-- Complete motivation: power, simplicity and beauty
+- Complete motivation: power, simplicity, etc
+- Complete formal documentaion: small-step inference rules
 - Complete guide to programming in this language
