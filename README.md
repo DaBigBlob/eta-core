@@ -14,9 +14,9 @@ Freestanding Rust implementation of my structural calculus.
 - **Keywords**: There are no keywords in this programming language!
 - **Metacircularity**: The Eta evaluator is also just a program of the Eta language.
 - **Fundamental Axioms/primitives**: The Eta language has 2 axioms (i.e. inhabitants of the lowest Type universe):
-    - The (existence of) evaluator itself (called Eta) (`new_eta_kind()`).
-    - The trivial O(1) computation/evaluation (called Omicron) (`new_omi_kind()`).
-- **Extensibility**: More axioms can be trivially added (using `Kind::TryFrom(newAxiom, axiomIdentity)`).
+    - The (existence of) evaluator itself (called Eta) (created using `new_eta_kind()`).
+    - The trivial O(1) computation/evaluation (called Omicron) (created using  `new_omi_kind()`).
+- **Extensibility**: More axioms can be trivially added (using `Kind::TryFrom(newAxiom, axiomIdentity)`). The metacircular temporal tower (default from `src/theory.rs`) can be replaced with a custom one.
 
 ## Install
 ```bash
