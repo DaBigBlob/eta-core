@@ -1,5 +1,22 @@
 # Eta Core (no_std)
-Rust implementation of my structural calculus.
+Freestanding Rust implementation of my structural calculus.
+
+## In persuit of answers to
+- How small can a language be?
+- Can a language be so small that the only primitive of that language is the lanaguage interpreter itself?
+- Can we create a keyword-less programming language?
+- Can we create a turing complete calculus of structural morphisms - in particular, as an automaton on tree structure?
+- Can we represent Types (and stratified Type universes) in terms of structures (with holes)?
+- What if we could rationalize interpretation of a program as the result a temporal tower of self-evaluation with *the latest evaluation* being that of the impurity (not self-eval) program?
+
+## Syntax/Semantics
+- **`S-Pair`**: Every program is a `S-Pair` i.e. an `S-expression` with exactly two members. This just the default surface syntax (`src/human.rs`) and is completely separate from the actual (AST) evaluator (`src/theory.rs`), and hence cna be pretty trivially changed.
+- **Keywords**: There are no keywords in this programming language!
+- **Metacircularity**: The Eta evaluator is also just a program of the Eta language.
+- **Fundamental Axioms/primitives**: The Eta language has 2 axioms (i.e. inhabitants of the lowest Type universe):
+    - The (existence of) evaluator itself (called Eta) (`new_eta_kind()`).
+    - The trivial O(1) computation/evaluation (called Omicron) (`new_omi_kind()`).
+- **Extensibility**: More axioms can be trivially added (using `Kind::TryFrom(newAxiom, axiomIdentity)`).
 
 ## Install
 ```bash
@@ -56,7 +73,7 @@ match eta(&mut exp) {
 ```
 
 ## Lambda Calculus
-Lambda calculus can be implemented as a sub-calculus of Eta.
+Lambda calculus can be implemented as a sub-calculus of Eta. (Evidence for turing completeness.)
 
 ```lisp
 ;a comment starts with ; and continues to end of line
@@ -92,4 +109,6 @@ Lambda calculus can be implemented as a sub-calculus of Eta.
 )))
 ```
 
-> Documentation under heavy WIP.
+## ⚠️ **TODO**
+- Complete motivation: power, simplicity and beauty
+- Complete guide to programming in this language
