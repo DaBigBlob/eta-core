@@ -32,7 +32,7 @@ let mut out = String::new(); /* create output string for reuse */
 basic::execute(&mut out, input.chars().into_iter()); /* run the executor */
 print!("{out}"); /* use it however */
 ```
-ℹ️ **Note**: `basic::execute` returns a `I:` part (input) and a `E:` part (evaluated), separated by newline. The `I:` is the Eta expression is what the parser understands from the actual input. The `E:` part is what is returned from the evaluator.
+ℹ️ **Note**: `basic::execute` returns a `I:` part (input) and a `E:` part (evaluated), separated by newline. `I:` is the Eta expression the parser understood from the actual input. `E:` part is what is returned from the evaluator.
 
 ### Advanced Usage
 ```rs
