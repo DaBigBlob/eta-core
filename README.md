@@ -69,7 +69,7 @@ Lambda calculus can be implemented as a sub-calculus of Eta.
 ;NOTE: as we have described,
 ;   application is of form (E (P (<lambda abstraction>  <applicand>)))
 ;   abstraction is of form (A (<binding variabel> <body>))
-;NOTE: alpha renaming is not a real thing, make sure to name accordingly
+;NOTE: eta does not alpha rename automatically, make sure to name accordingly
 
 ;example 1: omega combinator
 ;uncomment the following to make your stack overflow ☺️
