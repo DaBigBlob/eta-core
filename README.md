@@ -22,8 +22,8 @@ Freestanding Rust implementation of my structural calculus.
 ```bash
 cargo add eta-core
 ```
-
-## Basic Usage
+## Usage
+### Basic Usage
 ```rs
 use eta_core::basic; /* import */
 
@@ -32,8 +32,9 @@ let mut out = String::new(); /* create output string for reuse */
 basic::execute(&mut out, input.chars().into_iter()); /* run the executor */
 print!("{out}"); /* use it however */
 ```
+ℹ️ **Note**: `basic::execute` returns a `I:` part (input) and a `E:` part (evaluated), separated by newline. The `I:` is the Eta expression is what the parser understands from the actual input. The `E:` part is what is returned from the evaluator.
 
-## Advanced Usage
+### Advanced Usage
 ```rs
 /* this is essentially the implementation of eta_core::basic::runner */
 
