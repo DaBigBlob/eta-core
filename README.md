@@ -115,5 +115,5 @@ This is and will be a **generative-AI/LLM free** codebase. (Makes no sense to ou
 
 ## ⚠️ **TODO**
 - Complete motivation: power, simplicity, etc
-- Complete formal documentaion: small-step inference rules
+- Complete formal documentaion: small-step inference rules and BNF
 - Complete guide to programming in this language
