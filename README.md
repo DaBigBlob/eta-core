@@ -11,7 +11,8 @@ Freestanding Rust implementation of my structural combinator calculus.
 
 ## Syntax/Semantics
 - **`S-Pair`**: Every program is a `S-Pair` i.e. an `S-expression` with exactly two members. This just the default surface syntax (`src/human.rs`) and is completely separate from the actual (AST) evaluator (`src/theory.rs`), and hence cna be pretty trivially changed.
-- **Keywords**: There are no keywords in this programming language!
+- **Evaluation**: The evaluation (on AST) is similar to untyped lambda calculus (with De Bruijn indices) *except*, "beta-reduction" only takes place if the binding "variable"/Structure is a Super-Structure/Type of the argument (also a Structure).
+- **Keywords**: There are no keywords in this programming language! This is purely structural calculus.
 - **Metacircularity**: The Eta evaluator is also just a program of the Eta language.
 - **Fundamental Axioms/primitives**: The Eta language has 2 axioms (i.e. opaque Types/Structures):
     - The (existence of) evaluator itself (called Eta) (created using `new_eta_kind()`).
