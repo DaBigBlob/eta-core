@@ -19,6 +19,44 @@ Freestanding Rust implementation of my structural combinator calculus.
     - The (existence of) trivial (no-op) O(1) computation/evaluation (called Omicron) (created using  `new_omi_kind()`).
 - **Extensibility**: More axioms can be trivially added (using `Kind::TryFrom(newAxiom, axiomIdentity)`). The metacircular temporal tower (default from `src/theory.rs`) can be replaced with a custom one.
 
+## Lambda Calculus
+Lambda calculus can be implemented as a sub-calculus of Eta. (Evidence for turing completeness.)
+
+```lisp
+;a comment starts with ; and continues to end of line
+((E ((A A) E)) ;external capture of eta and omicron
+
+(E (; invoking eta
+(P ;capturing lambda application implementation from below
+;<---lambda expression begin--->
+
+;NOTE: as we have described,
+;   application is of form (E (P (<lambda abstraction>  <applicand>)))
+;   abstraction is of form (A (<binding variabel> <body>))
+;NOTE: eta does not alpha rename automatically, make sure to name accordingly
+
+;example 1: omega combinator
+;uncomment the following to make your stack overflow ☺️
+; (E (P (
+; (A (y (E (P (y y)))))
+; (A (y (E (P (y y)))))
+; )))
+
+;example 2: make 4 of the virus 🦠
+(E(P ((A (v ((v v) (v v)))) 🦠)))
+
+;<---lambda expression end--->
+)
+
+(;this is the lambda application implementation to be used as P
+((A (n b)) x)
+(E ((n b) x))
+)
+
+)))
+```
+ℹ️ **Note**: You can play with this Eta (default surface language) with the WASM web-port of the interpreter at https://0xE.io (a CLI and other ports availabe at [Eta Human Interface Implementations Repository](https://github.com/DaBigBlob/eta-rs) ).
+
 ## Install
 ```bash
 cargo add eta-core
@@ -72,43 +110,6 @@ match eta(&mut exp) {
     Ok(res) => println!("E[^]: {}\n", View::new(&res, &dict)), /* (eta could not be consumed) */
     Err(res) => println!("E[H]: {}\n", View::new(&res, &dict))  /* halt (eta is consumed) */
 }
-```
-
-## Lambda Calculus
-Lambda calculus can be implemented as a sub-calculus of Eta. (Evidence for turing completeness.)
-
-```lisp
-;a comment starts with ; and continues to end of line
-((E ((A A) E)) ;external capture of eta and omicron
-
-(E (; invoking eta
-(P ;capturing lambda application implementation from below
-;<---lambda expression begin--->
-
-;NOTE: as we have described,
-;   application is of form (E (P (<lambda abstraction>  <applicand>)))
-;   abstraction is of form (A (<binding variabel> <body>))
-;NOTE: eta does not alpha rename automatically, make sure to name accordingly
-
-;example 1: omega combinator
-;uncomment the following to make your stack overflow ☺️
-; (E (P (
-; (A (y (E (P (y y)))))
-; (A (y (E (P (y y)))))
-; )))
-
-;example 2: make 4 of the virus 🦠
-(E(P ((A (v ((v v) (v v)))) 🦠)))
-
-;<---lambda expression end--->
-)
-
-(;this is the lambda application implementation to be used as P
-((A (n b)) x)
-(E ((n b) x))
-)
-
-)))
 ```
 
 ## Generative-AI/LLM
