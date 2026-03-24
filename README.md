@@ -55,7 +55,7 @@ Lambda calculus can be implemented as a sub-calculus of Eta. (Evidence for turin
 
 )))
 ```
-ℹ️ **Note**: You can play with this Eta (default surface language) with the WASM web-port of the interpreter at https://0xE.io (a CLI and other ports availabe at [Eta Human Interface Implementations Repository](https://github.com/DaBigBlob/eta-rs) ).
+ℹ️ **Note**: You can play with Eta (default surface language) with the WASM web-port of the interpreter at https://0xE.io (a CLI and other ports availabe at [Eta Human Interface Implementations Repository](https://github.com/DaBigBlob/eta-rs) ).
 
 ## Install
 ```bash
