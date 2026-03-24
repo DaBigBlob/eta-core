@@ -2,7 +2,7 @@
 Freestanding Rust implementation of my structural combinator calculus.
 
 ![first_program](assets/first_program.png)
-*(Figure: First program I ever wrote in Eta.)*
+*(Figure: A program in Eta written before Eta interpreter existed.)*
 
 ## In persuit of answers to
 - How small can a language be?
