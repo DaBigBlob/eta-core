@@ -1,6 +1,9 @@
 # Eta Core (no_std)
 Freestanding Rust implementation of my structural combinator calculus.
 
+![first_program](assets/first_program.png)
+*(Figure: First program I ever wrote in Eta.)*
+
 ## In persuit of answers to
 - How small can a language be?
 - Can a language be so small that the only primitive of that language is the lanaguage interpreter itself?
