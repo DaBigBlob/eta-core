@@ -1,5 +1,5 @@
 # Eta Core (no_std)
-Freestanding Rust implementation of my structural calculus.
+Freestanding Rust implementation of my structural combinator calculus.
 
 ## In persuit of answers to
 - How small can a language be?
@@ -13,9 +13,9 @@ Freestanding Rust implementation of my structural calculus.
 - **`S-Pair`**: Every program is a `S-Pair` i.e. an `S-expression` with exactly two members. This just the default surface syntax (`src/human.rs`) and is completely separate from the actual (AST) evaluator (`src/theory.rs`), and hence cna be pretty trivially changed.
 - **Keywords**: There are no keywords in this programming language!
 - **Metacircularity**: The Eta evaluator is also just a program of the Eta language.
-- **Fundamental Axioms/primitives**: The Eta language has 2 axioms (i.e. inhabitants of the lowest Type universe):
+- **Fundamental Axioms/primitives**: The Eta language has 2 axioms (i.e. opaque Types/Structures):
     - The (existence of) evaluator itself (called Eta) (created using `new_eta_kind()`).
-    - The trivial O(1) computation/evaluation (called Omicron) (created using  `new_omi_kind()`).
+    - The (existence of) trivial (no-op) O(1) computation/evaluation (called Omicron) (created using  `new_omi_kind()`).
 - **Extensibility**: More axioms can be trivially added (using `Kind::TryFrom(newAxiom, axiomIdentity)`). The metacircular temporal tower (default from `src/theory.rs`) can be replaced with a custom one.
 
 ## Install
